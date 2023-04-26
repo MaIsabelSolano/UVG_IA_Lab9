@@ -16,7 +16,8 @@ import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 import time 
 
-nIterations = 100
+nIterations = 300
+wins = 0  
 
 env = gym.make("FrozenLake-v1", render_mode = "human", desc=generate_random_map(size=4))
 
@@ -37,10 +38,11 @@ for n in range (nIterations):
         env.render()
 
         print(f"step no. {i+1}")
-        time.sleep(0.20)
+        # time.sleep(0.005)
 
         if returnValue[1] > 0:
             print("Win\n")
+            wins += 1
             env = gym.make("FrozenLake-v1", render_mode = "human", desc=generate_random_map(size=4))
             break
 
@@ -48,5 +50,5 @@ for n in range (nIterations):
             print("Game Over\n")
             break
 
-
+print(f"Number of wins: {wins}")
 env.close()
