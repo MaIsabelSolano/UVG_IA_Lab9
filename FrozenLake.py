@@ -13,25 +13,40 @@ Referencia: https://aleksandarhaber.com/installation-and-getting-started-with-op
 """
 
 import gymnasium as gym
+from gymnasium.envs.toy_text.frozen_lake import generate_random_map
 import time 
 
-env = gym.make("FrozenLake-v1", render_mode = "human")
+nIterations = 100
 
-env.reset()
+env = gym.make("FrozenLake-v1", render_mode = "human", desc=generate_random_map(size=4))
 
-env.render()
 
-numberOfSteps = 30
+for n in range (nIterations):
 
-for i in range(numberOfSteps):
-    randomAction = env.action_space.sample()
-    returnValue = env.step(randomAction)
+    print(f"Iteration no. {n+1}")
+
+    env.reset()
     env.render()
 
-    print(f"iteration {i}")
-    time.sleep(1)
+    numberOfSteps = 100
 
-    if returnValue[2]:
-        break
+    for i in range(numberOfSteps):
+        randomAction = env.action_space.sample()
+        returnValue = env.step(randomAction)
+        # print(returnValue)
+        env.render()
+
+        print(f"step no. {i+1}")
+        time.sleep(0.20)
+
+        if returnValue[1] > 0:
+            print("Win\n")
+            env = gym.make("FrozenLake-v1", render_mode = "human", desc=generate_random_map(size=4))
+            break
+
+        if returnValue[2]:
+            print("Game Over\n")
+            break
+
 
 env.close()
