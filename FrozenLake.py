@@ -18,6 +18,8 @@ import time
 
 nIterations = 300
 wins = 0  
+iterationInfo = []
+cantIterations = 0
 
 env = gym.make("FrozenLake-v1", render_mode = "human", desc=generate_random_map(size=4))
 
@@ -25,6 +27,7 @@ env = gym.make("FrozenLake-v1", render_mode = "human", desc=generate_random_map(
 for n in range (nIterations):
 
     print(f"Iteration no. {n+1}")
+    cantIterations += 1
 
     env.reset()
     env.render()
@@ -43,6 +46,8 @@ for n in range (nIterations):
         if returnValue[1] > 0:
             print("Win\n")
             wins += 1
+            iterationInfo.append(cantIterations)
+            cantIterations = 0
             env = gym.make("FrozenLake-v1", render_mode = "human", desc=generate_random_map(size=4))
             break
 
@@ -51,4 +56,6 @@ for n in range (nIterations):
             break
 
 print(f"Number of wins: {wins}")
+for x in range(len(iterationInfo)):
+    print(f"{x+1}: {iterationInfo[x]}")
 env.close()
