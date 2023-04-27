@@ -22,7 +22,7 @@ iterationInfo = []
 cantIterations = 0
 
 env = gym.make("FrozenLake-v1", render_mode = "human", desc=generate_random_map(size=4))
-
+env.metadata['render_fps'] = 30
 
 for n in range (nIterations):
 
