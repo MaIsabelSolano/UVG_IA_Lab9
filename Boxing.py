@@ -19,53 +19,35 @@ import shimmy
 import numpy as np
 import atari_py
 
+
 env = gym.make("Boxing-v3")
-env.metadata["render_fps"] = 60
 
-env.reset()
-env.render()
-randomAction = env.action_space.sample()
-returnValue = env.step
+Q = np.zeros([env.observation_space.n, env.action_space.n])
 
-action_space_size = env.action_space.n
-state_space_size = env.observation_space.shape[0]
-q_table = np.zeros((state_space_size, action_space_size))
+alpha = 0.1
+gamma = 0.6
+epsilon = 0.1
 
-learning_rate = 0.1
-discount_factor = 0.99
-rateExploroacion = 1
-maxRateExploroacion = 1
-minRateExploroacion = 0.01
-decay = 0.001
-
-nIterations = 300
-for i in range(nIterations):
-    obs = env.reset()
+for i in range(1, 10001):
+    state = env.reset()
     done = False
-    rateExploroacion = minRateExploroacion + (
-        maxRateExploroacion - minRateExploroacion
-    ) * np.exp(-decay * i)
+    score = 0
+
     while not done:
-        if np.random.uniform(0, 1) < rateExploroacion:
+        if np.random.uniform(0, 1) < epsilon:
             action = env.action_space.sample()
         else:
-            action = np.argmax(q_table[obs])
+            action = np.argmax(Q[state, :])
 
-        new_obs, reward, done, info = env.step(action)
+        next_state, reward, done, info = env.step(action)
 
-        maxqFutura = np.max(q_table[new_obs])
-        qActual = q_table[obs, action]
-        qNueva = (1 - learning_rate) * qActual + learning_rate * (
-            reward + discount_factor * maxqFutura
+        Q[state, action] += alpha * (
+            reward + gamma * np.max(Q[next_state, :]) - Q[state, action]
         )
-        q_table[obs, action] = qNueva
-        obs = new_obs
-    print("Iteración: %d, Punteo: %d" % (i + 1, info["score"]))
 
-obs = env.reset()
-done = False
-while not done:
-    action = np.argmax(q_table[obs])
-    obs, reward, done, info = env.step(action)
-    env.render()
-env.close()
+        state = next_state
+        score += reward
+
+    epsilon = 0.99 * epsilon
+
+    print("Iteracion:", i, "Score:", score)
