@@ -1,53 +1,55 @@
-"""
-Universidad del Valle de Guatemala
-Facultad de Ingeniería
-Departamento de Ciencias de la computación
-Inteligencia Artificial 
-
-Integrantes: 
-- Christopher García
-- Alejandro Gómez
-- Ma. Isabel Solano 
-- Roberto Vallecillos
-
-Referencia: https://aleksandarhaber.com/installation-and-getting-started-with-openai-gym-and-frozen-lake-environment-reinforcement-learning-tutorial/
-"""
-
-import gym
-import ale_py
-import shimmy
 import numpy as np
-import atari_py
+import gym
+from tqdm import tqdm
 
+env = gym.make('ALE/Boxing-v5')
+env.observation_space = gym.spaces.flatten_space(env.observation_space)
 
-env = gym.make("Boxing-v3")
+state_space = env.observation_space.shape[0]
+action_space = env.action_space.n
+qtable = np.zeros((state_space, action_space))
 
-Q = np.zeros([env.observation_space.n, env.action_space.n])
+alpha = 0.77
+gamma = 0.99
+epsilon = 1.0
+max_epsilon = 1.0
+min_epsilon = 0.01
+decay_rate = 0.001
+episodes = 2500
+max_steps = 100
 
-alpha = 0.1
-gamma = 0.6
-epsilon = 0.1
-
-for i in range(1, 10001):
+for episode in tqdm(range(episodes)):
     state = env.reset()
+    state = gym.spaces.flatten(env.observation_space, state[0])
     done = False
-    score = 0
-
-    while not done:
-        if np.random.uniform(0, 1) < epsilon:
-            action = env.action_space.sample()
+    step = 0
+    for step in range(max_steps):
+        exp_exp_tradeoff = np.random.uniform(0, 1)
+        if exp_exp_tradeoff > epsilon:
+            action = np.argmax(qtable[state, :])
         else:
-            action = np.argmax(Q[state, :])
+            action = env.action_space.sample()
+        new_state, reward, done, info, _ = env.step(action)
+        qtable[state, action] = qtable[state, action] + alpha * (reward + gamma * np.max(qtable[new_state, :]) - qtable[state, action])
+        state = new_state
+        if done:
+            break
+    epsilon = min_epsilon + (max_epsilon - min_epsilon) * np.exp(-decay_rate * episode)
 
-        next_state, reward, done, info = env.step(action)
+env.close()
 
-        Q[state, action] += alpha * (
-            reward + gamma * np.max(Q[next_state, :]) - Q[state, action]
-        )
+# block until user presses a key
+input("Press Enter to continue...")
 
-        state = next_state
-        score += reward
+env = gym.make('ALE/Boxing-v5', render_mode='human')
+env.observation_space = gym.spaces.flatten_space(env.observation_space)
+state = env.reset()
+done = False
+while not done:
+    state = gym.spaces.flatten(env.observation_space, state[0])
+    action = np.argmax(qtable[state, :])
+    new_state, reward, done, info, _ = env.step(action)
+    state = new_state
 
-    epsilon = 0.99 * epsilon
-
-    print("Iteracion:", i, "Score:", score)
+print("Reward: {}".format(reward))
+env.close()
