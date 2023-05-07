@@ -8,23 +8,26 @@ Integrantes:
 - Christopher García
 - Alejandro Gómez
 - Ma. Isabel Solano 
+- Roberto Vallecillos
 
 Referencia: https://aleksandarhaber.com/installation-and-getting-started-with-openai-gym-and-frozen-lake-environment-reinforcement-learning-tutorial/
 """
 
 import gymnasium as gym
 from gymnasium.envs.toy_text.frozen_lake import generate_random_map
-import time 
+import time
 
 nIterations = 300
-wins = 0  
+wins = 0
 iterationInfo = []
 cantIterations = 0
+
 
 env = gym.make("FrozenLake-v1", render_mode = "human", desc=generate_random_map(size=4))
 env.metadata['render_fps'] = 30
 
-for n in range (nIterations):
+
+for n in range(nIterations):
 
     print(f"Iteration no. {n+1}")
     cantIterations += 1
@@ -48,7 +51,9 @@ for n in range (nIterations):
             wins += 1
             iterationInfo.append(cantIterations)
             cantIterations = 0
-            env = gym.make("FrozenLake-v1", render_mode = "human", desc=generate_random_map(size=4))
+            env = gym.make(
+                "FrozenLake-v1", render_mode="human", desc=generate_random_map(size=4)
+            )
             break
 
         if returnValue[2]:
